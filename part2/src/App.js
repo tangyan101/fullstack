@@ -4,6 +4,13 @@ import Note from './components/Note'
 function App(props) {
   const [notes, setNotes] = useState(props.notes)
   const [newNote, setNewNote] = useState('')
+  // 添加状态 用于同步显哪些便签
+  const [showAll, setShowAll] = useState(true)
+
+  const notesToShow = showAll 
+  ? notes 
+  : notes.filter(note => note.important)
+
 
   // addNote handle
   const addNote =  (event) => {
@@ -34,8 +41,13 @@ function App(props) {
   return (
     <div>
       <h1>Notes</h1>
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all'}
+        </button>
+      </div>
       <ul>
-        {notes.map((note) =>
+        {notesToShow.map((note) =>
           <Note key={note.id} note={note} />
         )}
       </ul>
