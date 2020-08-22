@@ -1,65 +1,51 @@
 import React, { useState } from 'react'
-import Note from './components/Note'
 
-function App(props) {
-  const [notes, setNotes] = useState(props.notes)
-  const [newNote, setNewNote] = useState('')
-  // 添加状态 用于同步显哪些便签
-  const [showAll, setShowAll] = useState(true)
+const App = ()=>{
+  const [persons, setPersons] = useState([
+    {name: 'xiao A'}
+  ])
+  const [newName, setNewName] = useState('')
 
-  const notesToShow = showAll 
-  ? notes 
-  : notes.filter(note => note.important)
-
-
-  // addNote handle
-  const addNote =  (event) => {
-    event.preventDefault()
-    console.log('button clicked', event.target) 
-    const noteObject = {
-      content: newNote,
-      data: new Date().toISOString(),
-      important: Math.random() < .5,
-      id: notes.length + 1
-    }
-
-    // 添加输入的值
-    setNotes(notes.concat(noteObject))
-    // 清空输入框
-    setNewNote('')
-  }
-
-  // change value handle
-  const handleNoteChange = (event)=>{
-    console.log(event.target.value)
-    // 得到输入的值 更新状态
-    setNewNote(event.target.value)
-  }
-
-
-
-  return (
-    <div>
-      <h1>Notes</h1>
-      <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all'}
-        </button>
-      </div>
-      <ul>
-        {notesToShow.map((note) =>
-          <Note key={note.id} note={note} />
-        )}
-      </ul>
-      <form onSubmit={addNote}>
-        <input
-          value={newNote}
-          onChange={handleNoteChange}
-        ></input>
-        <button type="submit">save</button>
-      </form>
-    </div>
-  );
+// 表单提交的处理函数
+const addPhonebook = (event) => {
+  // 阻止提交表单时表单默认刷新页面
+  event.preventDefault()
+  persons.push({name: newName})
+  setPersons(persons)
+  console.log('persons', persons)
+  setNewName('')
 }
+
+  // 处理输入框输入值的函数
+const handleNameChange = (event)=> {
+  // console.log(event.target.value)
+  setNewName(event.target.value)
+}
+
+  return(
+    <div>
+      <h2>Phonebook</h2>
+      <form onSubmit={addPhonebook}>
+        <div>
+          name: <input 
+            value={newName}
+            onChange={handleNameChange}
+          ></input>
+        </div>
+        <div>
+          <button type='submit'>add</button>
+        </div>
+      </form>
+      <h2>Numbers</h2>
+      <ul>
+        {persons.map((item, i)=>{
+          return <li key={i}>{item.name}</li>
+        })}
+      </ul>
+    </div>
+  )
+}
+
+
 
 export default App;
