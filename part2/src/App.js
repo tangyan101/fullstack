@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import FiterName from './components/FiterName'
 
 const App = ()=>{
   const [persons, setPersons] = useState([
@@ -78,9 +79,7 @@ const fiterName = (event)=>{
   return(
     <div>
       <h2>Phonebook</h2>
-      <div>
-        filter show   with <input onChange={fiterName}></input>
-      </div>
+      <FiterName handleFiter={fiterName}></FiterName>
       <h3>Add a new</h3>
       <PersonForm
         addPhonebook={addPhonebook}
