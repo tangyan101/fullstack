@@ -1,101 +1,92 @@
-import React, { useState } from 'react';
-import PersonForm from './components/PersonForm'
-import Persons from './components/Persons'
-import FiterName from './components/FiterName'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios'
+
+import Note from './components/Note'
 
 const App = ()=>{
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456' },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-    { name: 'Dan Abramov', number: '12-43-234345' },
-    { name: 'Mary Poppendieck', number: '39-23-6423122' }
-  ])
+  const [all, setAll] = useState([])
+  const [searchValue, setSearchValue] = useState('')
 
-  const [newName, setNewName] = useState('')
-  const [newNum, setnewNum] = useState('')
+  const getAll = ()=> {
+    return axios 
+      .get('https://restcountries.eu/rest/v2/all')
+  }
 
-  const [showFilter, setShowFilter] = useState([])
-  const [showName, setShowName] = useState('')
-
-// 检验是否重名
-const checkName = () => {
-  // 使用try catch 可以终止forEach继续遍历
-  try{
-    persons.forEach( ele =>{
-      if(ele.name === newName) {
-        alert(`${newName} 重名了，请修改名称`)
-        throw Error();
-      }else if(newName.trim() === ''){
-        alert(`请输入`)
-        throw Error();
-      }
+  useEffect(()=>{
+    console.log('effect')
+    getAll()
+    .then(response => {
+      setAll(response.data)
     })
-  } catch(e){
-    return true;
+  }, [])
+
+  // 根据输入的关键字过滤数据
+  const upData = (data, val) => {
+   return data.filter(function(ele){
+      return ele.name.indexOf(val) !== -1
+    })
   }
-}
 
-// 表单提交的处理函数
-const addPhonebook = (event) => {
-  // 阻止提交表单时表单默认刷新页面
-  event.preventDefault()
-  if(checkName()) {
-    return;
-  }else{
-    persons.push({name: newName, number: newNum})
-    setPersons(persons)
-    console.log('persons', persons)
-    setNewName('')
-    setnewNum('')
+  // 输入框的输入事件监听函数
+  const handleSearchValue = (event) => {
+    // 先清空
+    let timer;
+
+    let str = event.target.value;
+    setSearchValue(str)
+    
+    timer = setTimeout(()=>{
+      clearTimeout(timer) 
+      getAll()
+      .then(response => {
+        setAll(upData(response.data, str))
+      })
+    }, 600)
+
   }
-}
 
-  // 处理输入框输入名字的函数
-const handleNameChange = (event)=> {
-  // console.log(event.target.value)
-  setNewName(event.target.value)
-}
-// 处理输入框输入号码的函数
-const handleNumChange = (event) => {
-  console.log(event.target.value)
-  setnewNum(event.target.value)
-}
+  // 展示国家列表
+  const showToCountry = (ele, i) => {
+    return( 
+      <Note key={i} note={ele} ></Note>
+    )
+  } 
 
-// 过滤函数
-const fiterName = (event)=>{
-  console.log(event.target.value)
-  setShowName(event.target.value)
-  let temp
-  setTimeout(()=>{
-      temp = persons.filter(item => {
-        return item.name.toLowerCase().indexOf(showName.toLowerCase()+'') !== -1
-       })
-      setShowFilter(temp)
-      console.log(temp)
-  },800)
+  const showCount = () => {
+    if( all.length < 10 && all.length> 1){
+      return all.map(showToCountry) 
+    }
+    if(all.length > 10 || all.length === 0){
+      return '请输入相关的国家名称.'
+    }
+    if(all.length === 1) {
+      console.log(all)
+      const o = {...all[0]}
 
-}
+     return (<div>
+     <h1>{o.name}</h1>
+      <p>首都：{o.capital}</p>
+      <p>人口：{o.population}</p>
+      <h2>语言</h2>
+      <li>{o.languages.map(ele => <li>{ele.name}</li>)}</li>
+      <div style={{width:200}}>
+        <img style={{width:'100%'}} src={o.flag}></img>
+      </div>
+     </div>)
+    }
+    
+  }
 
   return(
     <div>
-      <h2>Phonebook</h2>
-      <FiterName handleFiter={fiterName}></FiterName>
-      <h3>Add a new</h3>
-      <PersonForm
-        addPhonebook={addPhonebook}
-        handleName={handleNameChange}
-        handleNum={handleNumChange}
-        newName = {newName}
-        newNum = {newNum}
-      ></PersonForm>
-      <h3>Numbers</h3>
-      <ul>
-        <Persons persons={(showName === '') ?persons : showFilter}></Persons>
-      </ul>
+        <div>搜索国家  <input value={searchValue} onChange={handleSearchValue}></input> </div>
+          {console.log('render', all.length)}
+        <ul>
+          {showCount()}
+        </ul>
     </div>
   )
 }
 
 
-
-export default App;
+export default App
